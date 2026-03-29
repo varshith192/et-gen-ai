@@ -1,5 +1,6 @@
 import os
 import json
+import re
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
@@ -8,13 +9,17 @@ from groq import Groq
 
 load_dotenv()
 
-client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+# Verify and configure API key
+api_key = os.getenv("GROQ_API_KEY")
+print(f"Loaded GROQ_API_KEY: {'[SET - Ends in ' + api_key[-4:] + ']' if api_key and len(api_key) > 4 else '[NOT VALID/MISSING]'}")
+
+client = Groq(api_key=api_key)
 
 app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allows localhost:5173
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -30,45 +35,68 @@ class AnalyzeResponse(BaseModel):
 
 @app.post("/analyze", response_model=AnalyzeResponse)
 async def analyze_text(request: AnalyzeRequest):
-    if not request.input_text.strip():
-        raise HTTPException(status_code=400, detail="Input text cannot be empty")
+    input_text = request.input_text.strip()
+    if not input_text:
+        return AnalyzeResponse(
+            recommendation="HOLD",
+            confidence=0.0,
+            reason="Input text cannot be empty."
+        )
+        
+    prompt = f"""Analyze the following financial text and return ONLY valid JSON.
+
+Text: {input_text}
+
+Return format:
+{{
+"recommendation": "BUY or SELL or HOLD",
+"confidence": number between 0 and 1,
+"reason": "short explanation"
+}}"""
         
     try:
+        print(f"\n--- AI Request Triggered ---")
         completion = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
             messages=[
                 {
-                    "role": "system",
-                    "content": (
-                        "You are an expert financial analysis multi-agent swarm. Your task is to process stock news or PR data. "
-                        "Read the input carefully, perform sentiment analysis, map it to a decision, and state your reasoning clearly. "
-                        "You MUST return the output as a strictly formatted JSON object with exactly these three keys: "
-                        "\n1. 'recommendation': MUST be exactly one of 'BUY', 'SELL', or 'HOLD'."
-                        "\n2. 'confidence': A numerical float between 0.0 and 1.0 indicating your certainty."
-                        "\n3. 'reason': A short, clear 1-3 sentence explanation detailing your reasoning."
-                    )
-                },
-                {
                     "role": "user",
-                    "content": request.input_text
+                    "content": prompt,
                 }
             ],
-            temperature=0.2, # Low temp for consistency
+            model="llama-3.3-70b-versatile",
+            temperature=0.1,
             response_format={"type": "json_object"}
         )
         
         response_content = completion.choices[0].message.content
+        print(f"Raw AI Response:\n{response_content}\n")
+        
         if not response_content:
             raise ValueError("Empty response from AI")
             
-        result = json.loads(response_content)
-        
+        # Extract JSON from response text safely
+        try:
+            result = json.loads(response_content)
+        except json.JSONDecodeError:
+            # Fallback extraction if not pure JSON
+            json_match = re.search(r'\{(?:[^{}]|(?(?=\{).*?\}))*\}', response_content, re.DOTALL)
+            if json_match:
+                result = json.loads(json_match.group(0))
+            else:
+                raise Exception("Failed to parse JSON")
+
+        print(f"Parsed JSON:\n{result}\n--------------------------")
+            
         rec = result.get("recommendation", "HOLD").upper()
         if rec not in ["BUY", "SELL", "HOLD"]:
             rec = "HOLD"
             
-        conf = float(result.get("confidence", 0.5))
-        reason = result.get("reason", "No reason provided by AI.")
+        try:
+            conf = float(result.get("confidence", 0.5))
+        except (ValueError, TypeError):
+            conf = 0.5
+            
+        reason = result.get("reason", "No reasoning provided by AI.")
         
         return AnalyzeResponse(
             recommendation=rec,
@@ -78,13 +106,17 @@ async def analyze_text(request: AnalyzeRequest):
         
     except Exception as e:
         print(f"AI Analysis Error: {e}")
-        # Fallback response
+        # Always return structured fallback if something fails
         return AnalyzeResponse(
             recommendation="HOLD",
             confidence=0.5,
-            reason="Unable to analyze confidently. Please try again."
+            reason=f"Unable to analyze confidently due to error: {str(e)[:50]}..."
         )
 
 @app.get("/health")
 def health_check():
     return {"status": "ok"}
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="127.0.0.1", port=8000)

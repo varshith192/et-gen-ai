@@ -14,13 +14,11 @@ export default function Analysis() {
   const [result, setResult] = useState<AnalysisResult | null>(null);
 
   const handleAnalyze = async () => {
-    if (!inputText.trim()) return;
-    
     setIsAnalyzing(true);
     setResult(null);
 
     try {
-      const response = await fetch('http://localhost:8000/analyze', {
+      const response = await fetch('http://127.0.0.1:8000/analyze', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -88,7 +86,7 @@ export default function Analysis() {
           <button 
             className="btn btn-primary" 
             onClick={handleAnalyze} 
-            disabled={isAnalyzing || !inputText.trim()}
+            disabled={isAnalyzing}
           >
             {isAnalyzing ? (
               <>
