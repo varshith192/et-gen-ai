@@ -1,0 +1,132 @@
+.analysis-page {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.input-card {
+  border: 1px solid var(--primary-accent);
+  box-shadow: var(--shadow-glow);
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Loader */
+.loader {
+  width: 50px;
+  height: 50px;
+  border: 4px solid var(--card-border);
+  border-top-color: var(--primary-accent);
+  border-radius: 50%;
+  animation: spin 1s infinite linear;
+}
+
+/* Results */
+.result-card {
+  position: relative;
+  overflow: hidden;
+  animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.result-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 4px;
+}
+
+.result-card.theme-green::before { background-color: var(--color-buy); }
+.result-card.theme-red::before { background-color: var(--color-sell); }
+.result-card.theme-yellow::before { background-color: var(--color-hold); }
+
+.recommendation-text {
+  font-size: 2.25rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.tracking-wider {
+  letter-spacing: 0.1em;
+}
+
+.font-bold {
+  font-weight: 700;
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+.block {
+  display: block;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.py-12 {
+  padding-top: 3rem;
+  padding-bottom: 3rem;
+}
+
+/* Confidence Bar */
+.confidence-meter-container {
+  width: 200px;
+}
+
+.confidence-bar-bg {
+  height: 8px;
+  background-color: var(--card-border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.confidence-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.confidence-bar-fill.theme-green { background-color: var(--color-buy); box-shadow: 0 0 10px var(--color-buy); }
+.confidence-bar-fill.theme-red { background-color: var(--color-sell); box-shadow: 0 0 10px var(--color-sell); }
+.confidence-bar-fill.theme-yellow { background-color: var(--color-hold); box-shadow: 0 0 10px var(--color-hold); }
+
+.explanation-section {
+  background-color: rgba(0,0,0,0.2);
+  padding: 1.5rem;
+  border-radius: var(--radius-md);
+  margin-top: 1rem;
+}
+
+.explanation-text {
+  line-height: 1.7;
+  font-size: 1rem;
+}
+
+@media (max-width: 768px) {
+  .result-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.5rem;
+  }
+  .confidence-meter-container {
+    width: 100%;
+  }
+  .confidence-meter-container .text-right {
+    text-align: left;
+  }
+}

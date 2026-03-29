@@ -1,0 +1,115 @@
+.about-page {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.max-w-2xl {
+  max-width: 42rem;
+}
+
+.mx-auto {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.title-gradient {
+  background: linear-gradient(to right, #ffffff, var(--primary-accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-size: 3rem;
+  font-weight: 800;
+}
+
+.icon-wrapper {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bg-primary-light { background-color: rgba(99, 102, 241, 0.1); }
+.bg-green-light { background-color: rgba(16, 185, 129, 0.1); }
+.bg-yellow-light { background-color: rgba(234, 179, 8, 0.1); }
+
+.mb-10 { margin-bottom: 2.5rem; }
+.mb-16 { margin-bottom: 4rem; }
+
+/* Flow Diagram */
+.flow-diagram-card {
+  padding: 3rem;
+  background-color: var(--card-bg);
+  border: 1px solid var(--card-border);
+}
+
+.flow-diagram {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+}
+
+.flow-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.step-box {
+  background-color: rgba(0,0,0,0.3);
+  border: 1px solid var(--card-border);
+  padding: 1.5rem;
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 120px;
+  text-align: center;
+  font-size: 0.875rem;
+  transition: all 0.3s ease;
+}
+
+.step-box:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-glow);
+}
+
+.border-blue { border-color: rgba(59, 130, 246, 0.5); }
+.border-purple { border-color: rgba(139, 92, 246, 0.5); }
+
+.result-box {
+  background: linear-gradient(145deg, rgba(99, 102, 241, 0.1), transparent);
+  border-color: var(--primary-accent);
+  box-shadow: 0 0 15px rgba(99, 102, 241, 0.3);
+}
+
+.flow-arrow {
+  color: var(--text-muted);
+  animation: pulse-arrow 2s infinite;
+}
+
+@keyframes pulse-arrow {
+  0% { transform: translateX(0); opacity: 0.5; }
+  50% { transform: translateX(5px); opacity: 1; }
+  100% { transform: translateX(0); opacity: 0.5; }
+}
+
+@media (max-width: 768px) {
+  .flow-diagram {
+    flex-direction: column;
+  }
+  .flow-arrow {
+    transform: rotate(90deg);
+  }
+  @keyframes pulse-arrow {
+    0% { transform: translateY(0) rotate(90deg); opacity: 0.5; }
+    50% { transform: translateY(5px) rotate(90deg); opacity: 1; }
+    100% { transform: translateY(0) rotate(90deg); opacity: 0.5; }
+  }
+}
